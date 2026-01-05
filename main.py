@@ -9,7 +9,7 @@ from sqladmin import Admin, ModelView
 import shutil
 import os
 
-DATABASE_URL = "sqlite+aiosqlite:///./db.sqlite3"  # для старта, потом легко заменить на Postgres
+# DATABASE_URL = "sqlite+aiosqlite:///./db.sqlite3"  # для старта, потом легко заменить на Postgres
 
 # -------------------- DB --------------------
 engine = create_async_engine(DATABASE_URL, echo=False)
