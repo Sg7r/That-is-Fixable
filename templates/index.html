@@ -23,7 +23,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        body { font-family: Arial; padding: 40px; }
+        body { font-family: Arial; padding: 5px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, 200px); gap: 20px; }
         img { width: 100%; border-radius: 8px; }
     </style>
@@ -36,17 +36,25 @@
    
 
     <!-- Commercial -->
-    <a href="/commercial"
-    class="relative flex-1 flex items-center justify-center text-white text-2xl md:text-3xl font-semibold uppercase tracking-wide transition overflow-hidden">
+<a href="/commercial"
+   class="relative group flex-1 flex items-center justify-center
+          text-white text-2xl md:text-3xl font-semibold uppercase tracking-wide
+          transition overflow-hidden">
 
     <!-- Background image -->
     <div
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-300 hover:scale-105"
+        class="absolute inset-0 bg-cover bg-center
+               transition-transform duration-300 group-hover:scale-105"
         style="background-image: url('/static/Commercial.jpg');">
     </div>
 
-    <!-- Dark overlay -->
-    <div class="absolute inset-0 bg-black/60 hover:bg-black/50 transition"></div>
+    <!-- Gradient overlay (bottom → top) -->
+    <div class="absolute inset-0 pointer-events-none
+               bg-gradient-to-t from-[#19305e]/90 to-transparent
+               transition-all duration-300
+               group-hover:from-black/70
+               group-hover:backdrop-blur-[4px]"
+                 ></div>
 
     <!-- Text -->
     <div class="relative z-10 text-center">
@@ -56,7 +64,7 @@
         </div>
     </div>
 
-    </a>
+</a>
 
      <!-- Divider -->
     <div class="divider"></div>
@@ -67,7 +75,9 @@
 
     <!-- Residential -->
     <a href="/residential"
-    class="relative flex-1 flex items-center justify-center text-white text-2xl md:text-3xl font-semibold uppercase tracking-wide transition overflow-hidden">
+        class="relative group flex-1 flex items-center justify-center
+          text-white text-2xl md:text-3xl font-semibold uppercase tracking-wide
+          transition overflow-hidden">
 
     <!-- Background image -->
     <div
@@ -75,10 +85,14 @@
         style="background-image: url('/static/Residential.jpg');">
     </div>
 
-    <!-- Dark overlay -->
-    <div class="absolute inset-0 bg-black/40 hover:bg-black/20 transition"></div>
-
-    <!-- Text -->
+    <!-- Gradient overlay (top -> bottom) -->
+    <div
+        class="absolute inset-0 pointer-events-none
+               bg-gradient-to-b from-[#19305e]/90 to-transparent
+               transition-all duration-300
+               group-hover:from-black/70
+               group-hover:backdrop-blur-[4px]">
+    </div>
     <div class="relative z-10 text-center">
         <div>Residential Repair</div>
         <div class="text-sm font-normal tracking-normal mt-2 opacity-90">
