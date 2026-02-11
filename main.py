@@ -1,16 +1,18 @@
 # main.py
 from fastapi import FastAPI, Request, UploadFile, Form
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, Integer
 from sqladmin import Admin, ModelView
+import httpx
 import shutil
 import os
 
 DATABASE_URL = "sqlite+aiosqlite:///./db.sqlite3"  # для старта, потом легко заменить на Postgres
-
+GEOAPIFY_KEY = "77753fef68564b96b586582efdf692f7"
 # -------------------- DB --------------------
 engine = create_async_engine(DATABASE_URL, echo=False)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
@@ -89,5 +91,130 @@ async def residential(request: Request):
         "residential.html",
         {"request": request},
     )
+
+
+# -------------------- SCHEDULE ENDPOINTS --------------------
+
+
+@app.get("/api/times")
+def get_times():
+    return JSONResponse([
+        "08:00 AM",
+        "09:00 AM",
+        "10:00 AM",
+        "11:00 AM",
+        "12:00 PM",
+        "01:00 PM",
+        "02:00 PM",
+        "03:00 PM",
+        "04:00 PM",
+        "05:00 PM",
+        
+    ])
+
+
+@app.get("/api/days")
+def get_days():
+    return JSONResponse([
+        "Monday",
+        "Tuesdat",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        
+    ])
+
+@app.get("/api/applianceTypes")
+def get_applianceTypes():
+    return JSONResponse([
+        "Refrigerator",
+        "Oven/Range",
+        "Dryer",
+        "Washer",
+        "Microwave",
+        "Dishwasher",
+        "Water heater",
+        "Window AC",
+        
+    ])
+
+@app.post("/schedule")
+def schedule(
+    day: str = Form(...),
+    time: str = Form(...),
+    applianceType: str = Form(...),
+    description: str = Form(...),
+    address: str = Form(...),
+    phone: str = Form(...)
+):
+    print(day, time, applianceType, description, address, phone)
+    return {
+        "status": "ok",
+        "day": day,
+        "time": time,
+        "appliance": applianceType,
+        "description": description,
+        "address": address,
+        "phone": phone
+    }
+
+@app.get("/api/address-search")
+async def address_search(q: str):
+    if len(q) < 3:
+        return []
+
+    url = "https://api.geoapify.com/v1/geocode/autocomplete"
+
+    params = {
+        "text": q,
+        "filter": "countrycode:us",
+        "limit": 5,
+        "apiKey": GEOAPIFY_KEY
+    }
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(2)
+        ) as client:
+            
+            r = await client.get(url, params=params)
+
+            r.raise_for_status()
+
+            data = r.json()
+
+
+
+            # 👇 Ловим ВСЕ сетевые ошибки
+    except httpx.HTTPError as e:
+        print("HTTP error:", e)
+        return []
+
+    # 👇 Ловим любые другие ошибки
+    except Exception as e:
+        print("Unexpected error:", e)
+        return []
+
+    results = []
+
+        
+    for item in data.get("features", []):
+        props = item["properties"]
+
+        if props.get("country_code") != "us":
+            continue
+        
+        results.append({
+            "formatted": props.get("formatted", ""),
+            "street": props.get("street", ""),
+            "city": props.get("city", ""),
+            "state": props.get("state", ""),
+            "postcode": props.get("postcode", "")
+        })
+
+    return results
+
+
 # -------------------- RUN --------------------
 # uvicorn main:app --reload
