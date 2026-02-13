@@ -66,7 +66,7 @@
                 action="/schedule"
                 x-data="formProgress()"
                 @filled.window="markFilled($event.detail)"
-                @submit="return validate()"
+                @submit.prevent="submitForm"
                
                 >
 
@@ -75,6 +75,7 @@
                     x-init="loadListItems()"
                     class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem]
                             mt-5 sm:mt-0">
+
 
             <!-- КНОПКА -->
                 <button
@@ -150,49 +151,49 @@
 
             <!-- Taketime -->
             <div    x-data="windowDropdown('/api/times', 'time')" 
-                            x-init="loadListItems()"
-                            class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-0">
+                    x-init="loadListItems()"
+                    class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
 
-                    <!-- КНОПКА -->
-                    <button
-                        type="button"
-                        @click="toggle"
-                        class="w-full border rounded px-4 py-2 flex justify-between">
-                        
-                            <!-- Icon transformed to greeт -->
-                        <div
-                            class="p-1 rounded transition-all"
-                            :class="selected
-                                ? 'bg-green-700 opacity-60 text-white'
-                                : 'text-gray-900'">
+                <!-- КНОПКА -->
+                <button
+                    type="button"
+                    @click="toggle"
+                    class="w-full border rounded px-4 py-2 flex justify-between">
+                    
+                        <!-- Icon transformed to greeт -->
+                    <div
+                        class="p-1 rounded transition-all"
+                        :class="selected
+                            ? 'bg-green-700 opacity-60 text-white'
+                            : 'text-gray-900'">
 
-                            <svg
-                                class="w-6 h-6"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
+                        <svg
+                            class="w-6 h-6"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            viewBox="0 0 24 24">
+
+                            <path
                                 stroke="currentColor"
-                                stroke-width="1.5"
-                                viewBox="0 0 24 24">
-
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                    />
-                            </svg>
-
-                        </div>
-
-                        <span x-text="selected ?? 'Pick your time'"></span>
-                        <svg class="w-4 h-4 transition"
-                                :class="{ 'rotate-180': open }"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M6 9l6 6 6-6"/>
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                />
                         </svg>
-                    </button>
+
+                    </div>
+
+                    <span x-text="selected ?? 'Pick your time'"></span>
+                    <svg class="w-4 h-4 transition"
+                            :class="{ 'rotate-180': open }"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
 
                 <!-- СПИСОК -->
                 <div
@@ -227,7 +228,7 @@
             <!-- Appliance types -->
             <div x-data="windowDropdown('/api/applianceTypes', 'appliance')" 
                 x-init="loadListItems()"
-                class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-0">
+                class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
 
                     <!-- КНОПКА -->
                 <button
@@ -292,19 +293,19 @@
                 </div>
 
                 <!-- скрытое поле -->
-                <input type="hidden" name="applianceType" :value="selected">
+                <input type="hidden" name="appliance" :value="selected">
 
             </div>
 
 
              <!-- Describe the problem -->
             <div x-data="windowDropdown()" 
-                 class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-0">
+                 class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
 
                 <!-- Description -->
 
                 <div x-data="{ open: false, text: '' }"
-                    class="relative w-full sm:max-w-[15rem] mt-5">
+                    class="relative w-full">
 
                 <!-- КНОПКА -->
                     <button
@@ -377,12 +378,12 @@
 
             <!-- Input adress -->
             <div x-data="windowDropdown('/api/address-search')" 
-                 class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-0">
+                 class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
 
                 <!-- Description -->
                 <div x-data="{ open: false, text:'' }"
                     @address-selected.window="text = $event.detail"
-                    class="relative w-full sm:max-w-[15rem] mt-5">
+                    class="relative ">
 
                     <!-- КНОПКА -->
                     <button
@@ -460,7 +461,7 @@
                                 </template>
 
                             </div>
-                            <input type="hidden" name="address" x-model="selected">
+                            <input type="hidden"  x-model="selected">
                             <p x-show="invalid" class="text-red-500 text-sm mt-1">
                                 Please select a valid address
                             </p>
@@ -479,12 +480,12 @@
 
              <!-- Phone number -->
             <div x-data="windowDropdown()" 
-                 class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-0">
+                 class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
 
                 <!-- Container -->
 
                 <div x-data="phoneMask()"
-                    class="relative w-full sm:max-w-[15rem] mt-5">
+                    class="relative">
 
                 <!-- КНОПКА -->
                     <button
@@ -555,26 +556,15 @@
             </div>
 
 
-
-
-           
-
-  <!-- hidden fields -->
-  
-  <!-- <input type="hidden" name="lat" :value="lat">
-  <input type="hidden" name="lon" :value="lon"> -->
-
-
-
-
-
-
-
-
-
             <button
                 type="submit"
-                class="relative mt-4 px-4 py-3 border rounded overflow-hidden">
+
+                :disabled="!validate()"
+                :class="validate()
+                    ? 'border-green-600 bg-white hover:bg-green-50'
+                    : 'border-gray-400 bg-gray-100 cursor-not-allowed opacity-70'"
+                class="relative mt-4 px-4 py-3 border rounded overflow-hidden transition">
+                
 
                 <div
                     class="absolute inset-y-0 left-0 bg-green-600 transition-all duration-500"
@@ -588,6 +578,37 @@
 
 
         </form>
+
+
+        <div x-data="{ show:false }"
+                @booking-complete.window="show=true">
+
+                <div x-show="show"
+                    x-transition
+                    class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+
+                    <div class="bg-white p-8 rounded shadow-xl text-center">
+
+                        <h2 class="text-xl font-bold mb-4">
+                            ✅ Booking completed!
+                        </h2>
+
+                        <p class="mb-4">
+                            We will contact you shortly.
+                        </p>
+
+                        <button
+                            @click="show=false"
+                            class="px-4 py-2 border rounded hover:bg-gray-100">
+                            Close
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
 
     </div>
      </div>
@@ -642,9 +663,26 @@
         validate() {
             return ['day','time','appliance','description','address','phone']
             .every(id => this.filled.has(id))
+        },
+
+        async submitForm() {
+
+            if (!this.validate()) return
+
+            const form = this.$el
+            const data = new FormData(form)
+
+            const res = await fetch("/schedule", {
+                method: "POST",
+                body: data
+            })
+
+            if (res.ok) {
+                window.dispatchEvent(new Event("booking-complete"))
+            }
         }
         }
-}
+    }
 
     function windowDropdown(api_link='', id='') {
         return {
@@ -755,7 +793,8 @@
         }
     }
 
-
+        
+   
 
   
 </script>

@@ -1,5 +1,5 @@
 # main.py
-from fastapi import FastAPI, Request, UploadFile, Form
+from fastapi import FastAPI, Request, UploadFile, Form, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -7,9 +7,13 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, Integer
 from sqladmin import Admin, ModelView
+from dotenv import load_dotenv
+from email.message import EmailMessage
 import httpx
 import shutil
 import os
+import smtplib
+
 
 DATABASE_URL = "sqlite+aiosqlite:///./db.sqlite3"  # для старта, потом легко заменить на Postgres
 GEOAPIFY_KEY = "77753fef68564b96b586582efdf692f7"
@@ -44,6 +48,39 @@ class PhotoAdmin(ModelView, model=Photo):
 
 admin = Admin(app, engine)
 admin.add_view(PhotoAdmin)
+
+# -------------------- Functions --------------------
+load_dotenv()
+EMAIL = os.getenv("EMAIL")
+APP_PASSWORD = os.getenv("APP_PASSWORD")
+
+
+def send_email(data: dict):
+
+    msg = EmailMessage()
+    msg["Subject"] = "New booking request"
+    msg["From"] = "SG7R77@gmail.com"
+    msg["To"] = "ThatIsFixableLLC@gmail.com"
+
+    body = f"""
+            New booking:
+
+            Day: {data['day']}
+            Time: {data['time']}
+            Appliance: {data['appliance']}
+            Description: {data['description']}
+            Address: {data['address']}
+            Phone: {data['phone']}
+            """
+
+    msg.set_content(body)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        smtp.login(EMAIL, APP_PASSWORD)
+        smtp.send_message(msg)
+
+
+
 
 # -------------------- ROUTES --------------------
 @app.on_event("startup")
@@ -140,24 +177,54 @@ def get_applianceTypes():
     ])
 
 @app.post("/schedule")
-def schedule(
+
+@app.post("/schedule")
+async def schedule(
+    background_tasks: BackgroundTasks,
     day: str = Form(...),
     time: str = Form(...),
-    applianceType: str = Form(...),
+    appliance: str = Form(...),
     description: str = Form(...),
     address: str = Form(...),
     phone: str = Form(...)
 ):
-    print(day, time, applianceType, description, address, phone)
-    return {
-        "status": "ok",
+
+    data = {
         "day": day,
         "time": time,
-        "appliance": applianceType,
+        "appliance": appliance,
         "description": description,
         "address": address,
         "phone": phone
     }
+
+    background_tasks.add_task(send_email, data)
+
+    return {"status": "ok"}
+
+
+
+
+
+
+# def schedule(
+#     day: str = Form(...),
+#     time: str = Form(...),
+#     applianceType: str = Form(...),
+#     description: str = Form(...),
+#     address: str = Form(...),
+#     phone: str = Form(...)
+# ):
+#     print(day, time, applianceType, description, address, phone)
+#     return {
+#         "status": "ok",
+#         "day": day,
+#         "time": time,
+#         "appliance": applianceType,
+#         "description": description,
+#         "address": address,
+#         "phone": phone
+#     }
 
 @app.get("/api/address-search")
 async def address_search(q: str):
