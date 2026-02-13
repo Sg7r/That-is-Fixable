@@ -8,6 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, Integer
 from sqladmin import Admin, ModelView
 from dotenv import load_dotenv
+from pathlib import Path
 from email.message import EmailMessage
 import httpx
 import shutil
@@ -50,7 +51,9 @@ admin = Admin(app, engine)
 admin.add_view(PhotoAdmin)
 
 # -------------------- Functions --------------------
-load_dotenv()
+dotenv_path = Path(__file__).resolve().parent.parent/ ".env"
+load_dotenv(dotenv_path)
+
 EMAIL = os.getenv("EMAIL")
 APP_PASSWORD = os.getenv("APP_PASSWORD")
 
