@@ -59,7 +59,7 @@
     <div class="sm:ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-0">
         <h3 class="text-heading text-base 
                     font-medium mb-3 text-center">
-                    FIELD WITH INFORMATION
+                    <!-- FIELD WITH INFORMATION -->
         </h3>
         
         <form   method="post" 
@@ -69,10 +69,10 @@
                 @submit.prevent="submitForm"
                
                 >
-
+         
             <!-- Take a day-->
-            <div    x-data="windowDropdown('/api/days', 'day')" 
-                    x-init="loadListItems()"
+            <div    x-data="calendar()" 
+                    x-init="init()"
                     class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem]
                             mt-5 sm:mt-0">
 
@@ -86,7 +86,7 @@
                       <!-- Icon transformed to greeт -->
                         <div
                             class="p-1 rounded transition-all"
-                            :class="selected
+                            :class="selectedDate && selectedSlot
                                 ? 'bg-green-700 opacity-60 text-white'
                                 : 'text-gray-900'">
 
@@ -109,8 +109,14 @@
                             </svg>
 
                         </div>    
-
-                    <span x-text="selected ?? 'Pick your day'"></span>
+                     <!-- <span x-text="'Pick your day'"></span>         -->
+                    <span
+                        x-text="
+                            selectedDate
+                            ? selectedDate + (selectedSlot ? ' ' + selectedSlot : '')
+                            : 'Pick your day'
+                              ">
+                    </span>
                     <svg class="w-4 h-4 transition"
                             :class="{ 'rotate-180': open }"
                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,85 +133,45 @@
                     @click.outside="open = false"
                     class="grid w-full grid-cols-2 gap-2 mt-5">
 
-                <template x-for="item in list_items" :key="item">
-                    <button
-                    type="button"
-                    @click="select(item)"
-                    class="inline-flex items-center 
-                                justify-center w-full p-2 text-sm font-medium
-                                text-center bg-neutral-primary border rounded-base 
-                                cursor-pointer text-fg-brand border-brand 
-                                peer-checked:border-brand peer-checked:bg-brand
-                                hover:text-white peer-checked:text-white 
-                                hover:bg-brand-strong">
-                    <span x-text="item"></span>
-                    </button>
-                </template>
+                    <template x-for="day in days" :key="day.date">
+                        <button
+                            type="button"
+                            @click="loadSlots(day), 
+                                open = false, 
+                                toggleTimeSlot()
+                                "
+                            class="inline-flex items-center 
+                                        justify-center w-full p-2 text-sm font-medium
+                                        text-center bg-neutral-primary border rounded-base 
+                                        cursor-pointer text-fg-brand border-brand 
+                                        peer-checked:border-brand peer-checked:bg-brand
+                                        hover:text-white peer-checked:text-white 
+                                        hover:bg-brand-strong">
+                            <!-- <span x-text="day.weekday"></span> -->
+                            <div x-text="day.weekday"></div>
+                            <div class="text-sm" x-text="day.date"></div>
+                        </button>
+                    </template>
+
+                 <!-- скрытое поле -->
+                <input type="hidden" name="day" :value="selectedDate">
 
                 </div>
 
-                <!-- скрытое поле -->
-                <input type="hidden" name="day" :value="selected">
-
-            </div>
-
-            <!-- Taketime -->
-            <div    x-data="windowDropdown('/api/times', 'time')" 
-                    x-init="loadListItems()"
-                    class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
-
-                <!-- КНОПКА -->
-                <button
-                    type="button"
-                    @click="toggle"
-                    class="w-full border rounded px-4 py-2 flex justify-between">
-                    
-                        <!-- Icon transformed to greeт -->
-                    <div
-                        class="p-1 rounded transition-all"
-                        :class="selected
-                            ? 'bg-green-700 opacity-60 text-white'
-                            : 'text-gray-900'">
-
-                        <svg
-                            class="w-6 h-6"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            viewBox="0 0 24 24">
-
-                            <path
-                                stroke="currentColor"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                />
-                        </svg>
-
-                    </div>
-
-                    <span x-text="selected ?? 'Pick your time'"></span>
-                    <svg class="w-4 h-4 transition"
-                            :class="{ 'rotate-180': open }"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M6 9l6 6 6-6"/>
-                    </svg>
-                </button>
-
-                <!-- СПИСОК -->
+        
+                <!-- СПИСОК TIME -->
                 <div
-                x-show="open"
-                x-transition
-                @click.outside="open = false"
-                class="grid w-full grid-cols-2 gap-2 mt-5">
+                
+                    x-show="selectedDate && timeSlotOpen"
+                    x-transition
+                    class="grid w-full grid-cols-2 gap-2 mt-5">
+                    
 
-                <template x-for="item in list_items" :key="item">
+                <template  x-for="slot in slots" :key="slot">
                     <button
                     type="button"
-                    @click="select(item)"
+                    @click="selectSlot(slot), toggleTimeSlot()"
+                    :disabled="isOccupied(slot)"
                     class="inline-flex items-center 
                                 justify-center w-full p-2 text-sm font-medium
                                 text-center bg-neutral-primary border rounded-base 
@@ -213,17 +179,20 @@
                                 peer-checked:border-brand peer-checked:bg-brand
                                 hover:text-white peer-checked:text-white 
                                 hover:bg-brand-strong">
-                    <span x-text="item"></span>
+                    <span   x-text="slot"></span>
                     </button>
                 </template>
+                
+                
+                <!-- скрытое поле -->
+                <input type="hidden" name="time" :value="selectedSlot">
 
                 </div>
-
-                <!-- скрытое поле -->
-                <input type="hidden" name="time" :value="selected">
+               
 
             </div>
-            
+
+
             
             <!-- Appliance types -->
             <div x-data="windowDropdown('/api/applianceTypes', 'appliance')" 
@@ -478,6 +447,80 @@
             </div>
 
 
+             <!-- Type your full name -->
+            <div x-data="windowDropdown()" 
+                 class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
+
+                <!-- Description -->
+
+                <div x-data="{ open: false, text: '' }"
+                    class="relative w-full">
+
+                <!-- КНОПКА -->
+                    <button
+                        type="button"
+                        @click="open = !open"
+                        class="w-full border rounded px-4 py-2 flex justify-between items-center">
+                        
+                        <!-- Icon transformed to greeт -->
+                        <div
+                            class="p-1 rounded transition-all"
+                            :class="text.length
+                                ? 'bg-green-700 opacity-60 text-white'
+                                : 'text-gray-900'">
+
+                            <svg
+                                class="w-6 h-6"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+
+                        </div> 
+
+                        <span x-text="text.length ? (text.length > 5 ? text.substring(0, 5) + '...' : text) : 'Input your full name'"></span>
+
+                        <svg class="w-6 h-6 transition"
+                            :class="{ 'rotate-180': open }"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+
+                <!-- DROPDOWN -->
+                    <div
+                        x-show="open"
+                        x-transition
+                        @click.outside="open = false"
+                        class="mt-3">
+
+                        <textarea
+                            x-model="text"
+                            name="name"
+                            rows="4"
+                            @input="text && $dispatch('filled', 'name')"
+                            placeholder="Example: Dryer not heating, makes loud noise..."
+                            class="w-full border rounded p-3 text-sm resize-none
+                                    bg-white text-black
+                                    placeholder:text-gray-500 placeholder:opacity-100
+                                    focus:outline-none focus:ring-2 focus:ring-black"></textarea>
+
+                    
+
+                    </div>
+                
+                </div>
+            </div>
+
              <!-- Phone number -->
             <div x-data="windowDropdown()" 
                  class="relative :ms-7 sm:ps-5  border-default w-full sm:max-w-[15rem] mt-5 sm:mt-3">
@@ -613,27 +656,6 @@
     </div>
      </div>
     
-
-
-    <!-- </div>
-    </div> -->
-
-
-    
-
-
-    <!-- Text -->
-    <!-- <div class="relative z-10 text-center"> -->
-        <!-- <div>Residential Repair</div>
-        <div class="text-sm font-normal tracking-normal mt-2 opacity-90">
-            Houses · Appartments · Ranch
-        </div>
-        <br><br> 
-         <div>Our web site is under construction </div>
-         <div>But you still can call or text us </div>
-          <br><br> 
-         <div>+1 (605) 521-8720 </div>
-         <div class="text-sm font-normal tracking-normal mt-2 opacity-90">Working hours Mon-Frid 7:30 AM - 6:30 PM </div> -->
     </div>
    </div>
 </body>
@@ -646,7 +668,65 @@
 
 
 
-<script>    
+<script>  
+
+   function calendar() {
+        return {
+
+        days: [],
+        selectedDate: null,
+        slots: [],
+        occupied: [],
+        selectedSlot: null,
+        open: false,
+        timeSlotOpen: false,
+
+
+        toggle() {
+                this.open = !this.open
+            },
+
+        toggleTimeSlot() {
+                this.timeSlotOpen = !this.timeSlotOpen
+            },
+
+        async init() {
+            const res = await fetch("/schedule/days")
+            this.days = await res.json()
+        },
+
+
+        async loadSlots(day) {
+            this.selectedDate = day.date
+            this.selectedSlot = null
+
+            this.$dispatch('filled', 'day')
+
+            const res = await fetch(`/schedule/slots?date=${day.date}`)
+            const data = await res.json()
+
+            this.slots = data.slots
+            this.occupied = data.occupied
+        },
+
+        isOccupied(time) {
+            return this.occupied.some(o => o.time === time)
+        },
+
+        selectSlot(slot) {
+            if (this.isOccupied(slot)) return
+                this.selectedSlot = slot
+                this.$dispatch('filled','time')
+        }
+        }
+    }
+
+
+
+
+
+   
+
 
     function formProgress() {
     return {
@@ -657,11 +737,11 @@
         },
 
         progress() {
-            return (this.filled.size / 6) * 100
+            return (this.filled.size / 7) * 100
         },
 
         validate() {
-            return ['day','time','appliance','description','address','phone']
+            return ['day','time','appliance','description','address','name', 'phone']
             .every(id => this.filled.has(id))
         },
 

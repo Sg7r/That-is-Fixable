@@ -1,5 +1,5 @@
 # main.py
-from fastapi import FastAPI, Request, UploadFile, Form, BackgroundTasks
+from fastapi import FastAPI, Request, UploadFile, Form, BackgroundTasks, Query
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -8,6 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, Integer
 from sqladmin import Admin, ModelView
 from dotenv import load_dotenv
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from email.message import EmailMessage
 import httpx
@@ -49,6 +50,14 @@ class PhotoAdmin(ModelView, model=Photo):
 
 admin = Admin(app, engine)
 admin.add_view(PhotoAdmin)
+
+
+# -------------------- DB --------------------
+occupied_slots = [
+    {"date": "2026-02-20", "time": "10:00"},
+]
+
+TIME_SLOTS = ["08:00", "10:00", "12:00", "14:00","16:00"]
 
 # -------------------- Functions --------------------
 dotenv_path = Path(__file__).resolve().parent.parent/ ".env"
@@ -134,7 +143,65 @@ async def residential(request: Request):
 
 
 # -------------------- SCHEDULE ENDPOINTS --------------------
+@app.get("/schedule/days")
+def get_days():
 
+    today = date.today()
+    days = []
+
+    for i in range(7):
+        d = today + timedelta(days=i)
+
+        days.append({
+            "date": d.isoformat(),
+            "weekday": d.strftime("%a")
+        })
+
+    return days
+
+
+@app.get("/schedule/slots")
+def get_slots(date: str = Query(...)):
+
+    # можно добавить валидацию формата даты
+
+    occupied = [
+        slot for slot in occupied_slots
+        if slot["date"] == date
+    ]
+
+    return {
+        "date": date,
+        "slots": TIME_SLOTS,
+        "occupied": occupied
+    }
+
+
+
+@app.get("/schedule/availability")
+def get_availability(date: str = Query(...)):
+
+    # today = date.today()
+    # days = []
+
+    # for i in range(7):
+    #     current_day = today + timedelta(days=i)
+
+    #     days.append({
+    #         "date": current_day.isoformat(),
+    #         "weekday": current_day.strftime("%A"),
+    #         "slots": TIME_SLOTS
+    #     })
+
+    # return {
+    #     "days": days,
+    #     "occupied": occupied_slots
+    # }
+    return {
+        "date": date,
+        "slots": TIME_SLOTS,
+        "occupied": occupied
+    }
 
 @app.get("/api/times")
 def get_times():
