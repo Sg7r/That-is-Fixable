@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from email.message import EmailMessage
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 import httpx
 import shutil
 import os
@@ -60,40 +62,45 @@ occupied_slots = [
 TIME_SLOTS = ["08:00", "10:00", "12:00", "14:00","16:00"]
 
 # -------------------- Functions --------------------
-dotenv_path = Path(__file__).resolve().parent.parent/ ".env"
+dotenv_path = Path(__file__).resolve().parent/ ".env"
 load_dotenv(dotenv_path)
 
-EMAIL = os.getenv("EMAIL")
-APP_PASSWORD = os.getenv("APP_PASSWORD")
+
+# EMAIL = os.getenv("EMAIL")
+# APP_PASSWORD = os.getenv("APP_PASSWORD")
+
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+FROM_EMAIL = os.getenv("FROM_EMAIL")
+TO_EMAIL = os.getenv("TO_EMAIL") 
 
 
 def send_email(data: dict):
 
-    msg = EmailMessage()
-    msg["Subject"] = "New booking request"
-    msg["From"] = "SG7R77@gmail.com"
-    msg["To"] = "ThatIsFixableLLC@gmail.com"
+    try:
+        message = Mail(
+                from_email=FROM_EMAIL,
+                to_emails=TO_EMAIL,
+                subject= "New booking request",
+                plain_text_content=f"""
+                    New booking:
 
-    body = f"""
-            New booking:
+                    Day: {data['day']}
+                    Time: {data['time']}
+                    Appliance: {data['appliance']}
+                    Description: {data['description']}
+                    Address: {data['address']}
+                    Phone: {data['phone']}
+                    """,
+            )
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        response = sg.send(message)
+        print("SendGrid response:", response.status_code)
+    except Exception as e:
+        print("Error sending email:", str(e))
+    
+    return JSONResponse({"success": True, "message": "Booking received!"})
 
-            Day: {data['day']}
-            Time: {data['time']}
-            Appliance: {data['appliance']}
-            Description: {data['description']}
-            Address: {data['address']}
-            Phone: {data['phone']}
-            """
-
-    msg.set_content(body)
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login(EMAIL, APP_PASSWORD)
-        smtp.send_message(msg)
-
-
-
-
+        
 # -------------------- ROUTES --------------------
 @app.on_event("startup")
 async def on_startup():

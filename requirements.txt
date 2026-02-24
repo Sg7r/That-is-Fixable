@@ -24,3 +24,11 @@ uvicorn==0.40.0
 WTForms==3.1.2
 httpx
 python-dotenv
+sendgrid python-http-clien
+
+
+
+
+
+
+
