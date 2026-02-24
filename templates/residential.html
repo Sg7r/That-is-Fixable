@@ -81,7 +81,7 @@
                 <button
                     type="button"
                     @click="toggle"
-                    class="w-full border rounded px-4 py-2 flex justify-between">
+                    class="w-full border rounded px-4 py-2 flex justify-between bg-white/25">
                     
                       <!-- Icon transformed to greeт -->
                         <div
@@ -110,7 +110,7 @@
 
                         </div>    
                      <!-- <span x-text="'Pick your day'"></span>         -->
-                    <span
+                    <span 
                         x-text="
                             selectedDate
                             ? selectedDate + (selectedSlot ? ' ' + selectedSlot : '')
@@ -146,7 +146,8 @@
                                         cursor-pointer text-fg-brand border-brand 
                                         peer-checked:border-brand peer-checked:bg-brand
                                         hover:text-white peer-checked:text-white 
-                                        hover:bg-brand-strong">
+                                        hover:bg-brand-strong
+                                        bg-white/25">
                             <!-- <span x-text="day.weekday"></span> -->
                             <div x-text="day.weekday"></div>
                             <div class="text-sm" x-text="day.date"></div>
@@ -178,7 +179,8 @@
                                 cursor-pointer text-fg-brand border-brand 
                                 peer-checked:border-brand peer-checked:bg-brand
                                 hover:text-white peer-checked:text-white 
-                                hover:bg-brand-strong">
+                                hover:bg-brand-strong
+                                bg-white/25">
                     <span   x-text="slot"></span>
                     </button>
                 </template>
@@ -203,7 +205,7 @@
                 <button
                     type="button"
                     @click="toggle"
-                    class="w-full border rounded px-4 py-2 flex justify-between">
+                    class="w-full border rounded px-4 py-2 flex justify-between bg-white/25">
                     
                      <!-- Icon transformed to gree -->
                     <div
@@ -254,7 +256,8 @@
                             cursor-pointer text-fg-brand border-brand 
                             peer-checked:border-brand peer-checked:bg-brand
                             hover:text-white peer-checked:text-white 
-                            hover:bg-brand-strong">
+                            hover:bg-brand-strong
+                            bg-white/25">
                         <span x-text="item"></span>
                     </button>
                 </template>
@@ -280,7 +283,7 @@
                     <button
                         type="button"
                         @click="open = !open"
-                        class="w-full border rounded px-4 py-2 flex justify-between items-center">
+                        class="w-full border rounded px-4 py-2 flex justify-between items-center bg-white/25">
                         
                         <!-- Icon transformed to greeт -->
                         <div
@@ -358,7 +361,7 @@
                     <button
                         type="button"
                         @click="open = !open"
-                        class="w-full border rounded px-4 py-2 flex justify-between items-center">
+                        class="w-full border rounded px-4 py-2 flex justify-between items-center bg-white/25">
                        
                         <div
                             class="p-1 rounded transition-all"
@@ -460,7 +463,7 @@
                     <button
                         type="button"
                         @click="open = !open"
-                        class="w-full border rounded px-4 py-2 flex justify-between items-center">
+                        class="w-full border rounded px-4 py-2 flex justify-between items-center bg-white/25">
                         
                         <!-- Icon transformed to greeт -->
                         <div
@@ -506,9 +509,9 @@
                         <textarea
                             x-model="text"
                             name="name"
-                            rows="4"
+                            rows="1"
                             @input="text && $dispatch('filled', 'name')"
-                            placeholder="Example: Dryer not heating, makes loud noise..."
+                            placeholder="James Jonson..."
                             class="w-full border rounded p-3 text-sm resize-none
                                     bg-white text-black
                                     placeholder:text-gray-500 placeholder:opacity-100
@@ -534,7 +537,7 @@
                     <button
                         type="button"
                         @click="open = !open"
-                        class="w-full border rounded px-4 py-2 flex justify-between items-center">
+                        class="w-full border rounded px-4 py-2 flex justify-between items-center bg-white/25">
                         
                         <!-- Icon transformed to green -->
                         <div
